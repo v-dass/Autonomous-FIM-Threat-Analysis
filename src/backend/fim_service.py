@@ -4,9 +4,11 @@ import time
 from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from src.backend.config import MONITORED_DIR, BACKEND_DIR, BASE_DIR
+import src.backend.config as config
+from src.backend.config import BACKEND_DIR, BASE_DIR
 from src.backend.forensic_logger import ForensicLogger
 from src.backend.context_collector import get_process_context
+from src.backend.response_engine import is_path_suppressed
 
 logger = ForensicLogger()
 
@@ -26,10 +28,10 @@ def calculate_sha256(file_path):
 def create_initial_baseline():
     """Scans the monitored directory and establishes the SHA-256 baseline."""
     logger.clear_baselines()
-    if not os.path.exists(MONITORED_DIR):
-        os.makedirs(MONITORED_DIR)
+    if not os.path.exists(config.MONITORED_DIR):
+        os.makedirs(config.MONITORED_DIR)
         
-    for root, _, files in os.walk(MONITORED_DIR):
+    for root, _, files in os.walk(config.MONITORED_DIR):
         for file in files:
             file_path = os.path.normpath(os.path.join(root, file))
             sha256 = calculate_sha256(file_path)
@@ -67,6 +69,10 @@ class SecurityEventHandler(FileSystemEventHandler):
 
         file_path = os.path.normpath(event.src_path)
         
+        # Ignore suppressed files (undergoing SOAR restoration/quarantine) to avoid feedback loops
+        if is_path_suppressed(file_path):
+            return
+
         # Ignore database file modifications to avoid loops
         if "forensics.db" in file_path or file_path.endswith(".db-journal") or file_path.endswith(".db-wal"):
             return
@@ -84,9 +90,11 @@ class SecurityEventHandler(FileSystemEventHandler):
         global _self_tampering_occurred, _tampered_components
         
         if is_self_protection:
-            # Self-protection monitoring checks (files inside backend/ or frontend/)
-            # Only trigger attestation flags if code binaries/configs are altered
-            if file_path.endswith(".py") or file_path.endswith(".json") or file_path.endswith(".html") or file_path.endswith(".css") or file_path.endswith(".js"):
+            # Self-protection monitoring checks (security backend core components only)
+            from src.backend.config import ATTESTATION_TARGETS
+            target_paths = {os.path.normpath(p) for p in ATTESTATION_TARGETS.values()}
+            norm_file = os.path.normpath(file_path)
+            if norm_file in target_paths:
                 _self_tampering_occurred = True
                 component_name = os.path.basename(file_path).replace(".py", "")
                 _tampered_components.add(component_name)
@@ -103,7 +111,10 @@ class SecurityEventHandler(FileSystemEventHandler):
         if event_type == "DELETED":
             integrity_status = "Integrity Violated"
         elif event_type == "CREATED":
-            integrity_status = "Integrity Violated" # New files are considered baseline violations
+            if hash_before and hash_before == current_hash:
+                integrity_status = "Integrity Preserved"
+            else:
+                integrity_status = "Integrity Violated"
         elif event_type == "MODIFIED":
             if hash_before and hash_before != hash_after:
                 integrity_status = "Integrity Violated"
@@ -183,8 +194,8 @@ class FileIntegrityMonitor:
         self.observer = Observer()
         
         # 1. Monitored Directory Watch
-        if os.path.exists(MONITORED_DIR):
-            self.observer.schedule(self.handler, MONITORED_DIR, recursive=True)
+        if os.path.exists(config.MONITORED_DIR):
+            self.observer.schedule(self.handler, config.MONITORED_DIR, recursive=True)
             
         # 2. Self-Protection Directory Watch (watching the src folder)
         src_dir = os.path.abspath(os.path.join(BACKEND_DIR, ".."))

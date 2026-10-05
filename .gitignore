@@ -1,0 +1,34 @@
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+src/backend/__pycache__/
+
+# Local database & WAL files
+*.db
+*.db-wal
+*.db-shm
+forensics.db
+
+# Sandbox & Runtime simulation test directories
+quarantine_dir/
+backup_dir/
+monitored_dir/
+
+# IDE & OS files
+.vscode/
+.idea/
+*.log
+*.zip
+
+# Temporary scripts & reference docs
+*.pdf
+*.docx
+generate_*.py
+build_*.py
+package_team_zips.py

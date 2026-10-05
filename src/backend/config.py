@@ -49,6 +49,8 @@ SENSITIVE_FILES = [
     "passwd",
     "private.key",
     "config.json",
+    "database.env",
+    "firewall_rules.conf",
 ]
 
 # Risk weights
