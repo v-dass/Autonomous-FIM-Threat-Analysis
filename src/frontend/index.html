@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Autonomous FIM & Threat Analysis System</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-regular-icons/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Vis.js for Attack Provenance Graph -->
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <!-- Chart.js for Timeline graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css?v=2.6.0">
+
+</head>
+<body>
+    <div class="cyber-grid"></div>
+    
+    <!-- Top Security Alert Banner -->
+    <div id="alarm-banner" class="alarm-banner hidden">
+        <span class="pulse-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        <span id="alarm-text">SYSTEM COMPROMISED - CRITICAL THREAT DETECTED</span>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="brand-text">
+                    <h1>AETHER-FIM</h1>
+                    <span>Autonomous Security System</span>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#overview" class="nav-item active" data-section="overview">
+                    <i class="fa-solid fa-gauge-high"></i> Overview
+                </a>
+                <a href="#fim" class="nav-item" data-section="fim">
+                    <i class="fa-solid fa-folder-tree"></i> File Integrity
+                </a>
+                <a href="#attestation" class="nav-item" data-section="attestation">
+                    <i class="fa-solid fa-cube"></i> Attestation
+                </a>
+                <a href="#analyst" class="nav-item" data-section="analyst">
+                    <i class="fa-solid fa-network-wired"></i> Threat Analyst
+                </a>
+                <a href="#response" class="nav-item" data-section="response">
+                    <i class="fa-solid fa-bolt"></i> Response Center
+                    <span id="approval-badge" class="badge hidden">0</span>
+                </a>
+                <a href="#logs" class="nav-item" data-section="logs">
+                    <i class="fa-solid fa-file-shield"></i> Forensic Logs
+                </a>
+                <a href="#compliance" class="nav-item" data-section="compliance">
+                    <i class="fa-solid fa-file-contract"></i> Compliance Audit
+                </a>
+                <a href="#quarantine" class="nav-item" data-section="quarantine">
+                    <i class="fa-solid fa-box-archive"></i> Quarantine Vault
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="mode-indicator">
+                    <span class="label">Response Mode:</span>
+                    <span id="sidebar-mode" class="status-val simulation">SIMULATION</span>
+                </div>
+                <div class="system-health">
+                    <span class="label">API Daemon:</span>
+                    <span class="health-dot online"></span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            
+            <!-- EXECUTIVE DEFENSE TOP BAR -->
+            <header class="executive-topbar">
+                <div class="topbar-left">
+                    <div class="defcon-badge defcon-5" id="defcon-badge" title="Current Cyber Defense Condition">
+                        <span class="defcon-pulse"></span>
+                        <span class="defcon-label" id="defcon-label">DEFCON 5 : GUARDED</span>
+                    </div>
+                    <div class="topbar-clocks">
+                        <span class="clock-item"><i class="fa-solid fa-globe text-cyan"></i> <strong id="clock-utc">UTC --:--:--</strong></span>
+                        <span class="clock-item">LOC: <strong id="clock-loc">--:--:--</strong></span>
+                        <span class="clock-item epoch-item font-mono">EPOCH: <strong id="clock-epoch">--.---</strong></span>
+                    </div>
+                    <div class="topbar-uptime">
+                        <i class="fa-solid fa-server text-cyan"></i> <span id="soc-uptime">UPTIME: 14d 08h 12m</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="hud-status-chip">
+                        <span class="hud-dot live"></span>
+                        <span class="hud-text">eBPF HOOK: LIVE</span>
+                    </div>
+                    <button id="theme-toggle-btn" class="topbar-action-btn" title="Toggle Light / Dark Theme">
+                        <i class="fa-solid fa-sun" id="theme-icon"></i>
+                        <span id="theme-text">Light Theme</span>
+                    </button>
+                    <button id="export-report-btn" class="topbar-action-btn highlight" title="Generate Official SOC Incident Report">
+                        <i class="fa-solid fa-file-arrow-down"></i>
+                        <span>Export SOC Report</span>
+                    </button>
+                </div>
+            </header>
+
+
+            <!-- SECTION 1: OVERVIEW -->
+            <section id="sec-overview" class="content-section">
+                <header class="section-header">
+                    <h2>Overview Dashboard</h2>
+                    <p>Real-time trust verification, threat levels, and autonomous response status.</p>
+                </header>
+
+                <!-- EXECUTIVE KPI SUMMARY CARDS -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-info">
+                            <span class="kpi-title">Mean Time to Detect (MTTD)</span>
+                            <span class="kpi-value">1.2 <small>ms</small></span>
+                            <span class="kpi-subtext text-success"><i class="fa-solid fa-bolt"></i> Sub-millisecond OS kernel hook</span>
+                        </div>
+                        <div class="kpi-sparkline positive">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-info">
+                            <span class="kpi-title">Mean Time to Remediate (MTTR)</span>
+                            <span class="kpi-value">8.4 <small>ms</small></span>
+                            <span class="kpi-subtext text-cyan"><i class="fa-solid fa-shield-halved"></i> Autonomous SOAR rollback</span>
+                        </div>
+                        <div class="kpi-sparkline active">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-info">
+                            <span class="kpi-title">Self-Healing Success Rate</span>
+                            <span class="kpi-value">100.0%</span>
+                            <span class="kpi-subtext text-success"><i class="fa-solid fa-circle-check"></i> Zero unhandled tampering</span>
+                        </div>
+                        <div class="kpi-sparkline full">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-info">
+                            <span class="kpi-title">False Positive Reduction</span>
+                            <span class="kpi-value">94.2%</span>
+                            <span class="kpi-subtext text-purple"><i class="fa-solid fa-brain"></i> Isolation Forest AI filtering</span>
+                        </div>
+                        <div class="kpi-sparkline purple">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <!-- Trust Score Gauge -->
+                    <div class="card status-card">
+                        <h3>Runtime Trust State</h3>
+                        <div class="gauge-container">
+                            <svg class="gauge" viewBox="0 0 100 100">
+                                <circle class="gauge-bg" cx="50" cy="50" r="40" />
+                                <circle class="gauge-fill trust-fill" cx="50" cy="50" r="40" style="stroke-dasharray: 251; stroke-dashoffset: 25.1;" />
+                            </svg>
+                            <div class="gauge-text">
+                                <span id="trust-score-val" class="score">90</span>
+                                <span id="trust-state-val" class="label text-trusted">TRUSTED</span>
+                            </div>
+                        </div>
+                        <p class="card-footer">Continuously verifying runtime attestation</p>
+                    </div>
+
+                    <!-- Threat Level Indicator -->
+                    <div class="card status-card">
+                        <h3>Active Threat Level</h3>
+                        <div class="threat-indicator-container">
+                            <div id="threat-indicator-glow" class="threat-glow status-normal"></div>
+                            <span id="threat-level-val" class="threat-level text-normal">NORMAL</span>
+                        </div>
+                        <p class="card-footer" id="threat-description">No suspicious file changes detected</p>
+                    </div>
+
+                    <!-- Quick Metrics -->
+                    <div class="card metrics-card">
+                        <h3>Telemetry Summary</h3>
+                        <div class="metrics-list">
+                            <div class="metric-item">
+                                <span class="m-label"><i class="fa-solid fa-file-shield text-cyan"></i> Files Monitored:</span>
+                                <span id="metric-files" class="m-val">0</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="m-label"><i class="fa-solid fa-bell text-warning"></i> Events Logged:</span>
+                                <span id="metric-events" class="m-val">0</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="m-label"><i class="fa-solid fa-triangle-exclamation text-danger"></i> Anomaly Incidents:</span>
+                                <span id="metric-incidents" class="m-val">0</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="m-label"><i class="fa-solid fa-reply text-success"></i> Auto Responses:</span>
+                                <span id="metric-responses" class="m-val">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Middle Row -->
+                <div class="main-layout-grid">
+                    <!-- Active Real-time Alert Feed -->
+                    <div class="card feed-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-bell text-cyan"></i> Real-time Incident Feed</h3>
+                            <button class="btn btn-sm btn-clear" id="btn-clear-feed">Clear View</button>
+                        </div>
+                        <div id="alert-feed-list" class="feed-list empty">
+                            <div class="empty-state">
+                                <i class="fa-solid fa-circle-check text-success"></i>
+                                <p>System secure. No active incidents.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System configuration control panel -->
+                    <div class="card config-card">
+                        <h3><i class="fa-solid fa-sliders text-cyan"></i> Security Controls</h3>
+                        <form id="config-form" class="cyber-form">
+                            <div class="form-group">
+                                <label for="monitored-path">Protected Folder Path</label>
+                                <input type="text" id="monitored-path" readonly value="d:\FIM project\monitored_dir">
+                            </div>
+                            <div class="form-group toggle-group">
+                                <span class="form-label-desc">
+                                    <strong>Response Mode</strong>
+                                    <small>Enforcement isolates processes & restores baseline files automatically. Simulation only logs warnings.</small>
+                                </span>
+                                <label class="cyber-switch">
+                                    <input type="checkbox" id="enforcement-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" id="btn-rebaseline"><i class="fa-solid fa-arrows-rotate"></i> Rebuild SHA-256 Baseline</button>
+                                <a href="#fim" class="btn btn-outline-cyan" id="btn-goto-upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Custom Files / Folder</a>
+                            </div>
+                            <div class="upload-quick-banner" onclick="document.querySelector('[data-section=\'fim\']').click()" style="cursor: pointer; margin-top: 15px; padding: 12px; border: 1px dashed #00f0ff; border-radius: 8px; background: rgba(0, 240, 255, 0.05); text-align: center;">
+                                <i class="fa-solid fa-cloud-arrow-up text-cyan" style="font-size: 22px; margin-bottom: 6px; display: block;"></i>
+                                <strong style="color: #00f0ff; font-size: 13px;">Upload Custom Assets (PDF, Word, Excel, Folders)</strong>
+                                <p style="font-size: 11px; color: #94a3b8; margin: 4px 0 0 0;">Click here or open the <strong>File Integrity</strong> tab to upload files or specify an entire folder to monitor alone.</p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: FILE INTEGRITY -->
+            <section id="sec-fim" class="content-section hidden">
+                <header class="section-header">
+                    <h2>File Integrity Monitoring & Custom Asset Ingestion</h2>
+                    <p>Real-time cryptographic SHA-256 verification, dynamic directory monitoring, and document protection.</p>
+                </header>
+
+                <!-- CUSTOM ASSET INGESTION & UPLOAD CENTER -->
+                <div class="card asset-upload-card">
+                    <div class="card-header-flex">
+                        <div>
+                            <h3><i class="fa-solid fa-cloud-arrow-up text-cyan"></i> Custom Asset Ingestion & Folder Protection</h3>
+                            <p class="hint">Upload your own documents (PDF, Word .docx, Excel, text, images, or folder) to be guarded in real time.</p>
+                        </div>
+                        <div class="header-badges">
+                            <span class="active-folder-badge"><i class="fa-solid fa-folder text-warning"></i> Active: <strong id="active-monitored-badge">monitored_dir</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="upload-grid">
+                        <!-- Dropzone for arbitrary files (PDF, DOCX, etc.) -->
+                        <div class="upload-zone" id="file-dropzone">
+                            <i class="fa-solid fa-file-circle-plus upload-icon text-cyan"></i>
+                            <h4>Drag & Drop Files Here</h4>
+                            <p>Supports <strong>PDF, Word (.docx), Excel, TXT, Code, Archives</strong> or any file format</p>
+                            <input type="file" id="custom-files-input" multiple class="hidden">
+                            <button type="button" class="btn btn-outline-cyan" onclick="document.getElementById('custom-files-input').click()">
+                                <i class="fa-solid fa-folder-open"></i> Browse Files from Computer
+                            </button>
+                            <div id="file-selection-preview" class="file-selection-preview hidden"></div>
+                        </div>
+
+                        <!-- Folder Upload & Target Path Controls -->
+                        <div class="folder-control-panel">
+                            <h4><i class="fa-solid fa-folder-tree text-warning"></i> Specified Folder Ingestion</h4>
+                            <p class="hint">Upload an entire folder from your computer or switch the active monitored directory path.</p>
+                            
+                            <input type="file" id="custom-folder-input" webkitdirectory directory multiple class="hidden">
+                            <div class="folder-btn-row">
+                                <button type="button" class="btn btn-outline-warning" onclick="document.getElementById('custom-folder-input').click()">
+                                    <i class="fa-solid fa-folder-plus"></i> Upload Specified Folder
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="btn-restore-defaults-ui" title="Restore initial 8 enterprise sample demo files">
+                                    <i class="fa-solid fa-rotate-left"></i> Reset Demo Files
+                                </button>
+                            </div>
+
+                            <hr class="cyber-divider">
+
+                            <div class="form-group">
+                                <label for="input-custom-dir"><i class="fa-solid fa-terminal text-cyan"></i> Direct System Directory Path</label>
+                                <div class="input-with-button">
+                                    <input type="text" id="input-custom-dir" placeholder="e.g. D:\FIM project\monitored_dir" class="font-mono">
+                                    <button type="button" class="btn btn-cyan btn-sm" id="btn-apply-custom-dir">
+                                        <i class="fa-solid fa-check"></i> Set Target
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Option to monitor uploaded files alone -->
+                            <div class="checkbox-control">
+                                <label class="cyber-checkbox">
+                                    <input type="checkbox" id="chk-monitor-alone" checked>
+                                    <span class="checkmark"></span>
+                                    <strong>Monitor Uploaded Files Alone</strong>
+                                </label>
+                                <small class="text-muted block-hint">Clears previous demo files so the system guards only your uploaded assets.</small>
+                            </div>
+
+                            <div class="upload-action-bar">
+                                <button type="button" class="btn btn-primary btn-block" id="btn-submit-upload" disabled>
+                                    <i class="fa-solid fa-shield-halved"></i> Upload & Establish Cryptographic Baseline
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-layout-split">
+                    <!-- Baseline Hash Table -->
+                    <div class="card table-card xl-70">
+                        <h3>Registered File Baselines</h3>
+                        <div class="table-container">
+                            <table id="baseline-table">
+                                <thead>
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>Registered SHA-256 Hash</th>
+                                        <th>Size (Bytes)</th>
+                                        <th>Baseline Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="baseline-list-body">
+                                    <tr><td colspan="4" class="text-center">Loading baselines...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Integrity Status Summary -->
+                    <div class="card info-card xl-30">
+                        <h3>Integrity Pipeline</h3>
+                        <div class="info-block-flow">
+                            <div class="flow-step">
+                                <div class="step-num">1</div>
+                                <div class="step-desc">Establish trusted directory baseline</div>
+                            </div>
+                            <div class="flow-step">
+                                <div class="step-num">2</div>
+                                <div class="step-desc">Watchdog captures creation/deletion/write events</div>
+                            </div>
+                            <div class="flow-step">
+                                <div class="step-num">3</div>
+                                <div class="step-desc">Re-calculate SHA-256 and perform baseline check</div>
+                            </div>
+                            <div class="flow-step">
+                                <div class="step-num">4</div>
+                                <div class="step-desc">Label status: Integrity Preserved / Violated</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: ATTESTATION -->
+            <section id="sec-attestation" class="content-section hidden">
+                <header class="section-header">
+                    <h2>Continuous Runtime Attestation</h2>
+                    <p>Verifying the execution environment integrity, policy files, and monitoring health.</p>
+                </header>
+
+                <div class="stats-grid">
+                    <!-- Attestation target list -->
+                    <div class="card components-card xl-60">
+                        <h3>Trusted Core Components</h3>
+                        <div id="attestation-components-list" class="components-list">
+                            <!-- Populated dynamically -->
+                            Loading target components...
+                        </div>
+                    </div>
+
+                    <!-- Trust Score History -->
+                    <div class="card chart-card xl-40">
+                        <h3>Runtime Trust History</h3>
+                        <div class="chart-container" style="height: 180px; position: relative;">
+                            <canvas id="trustChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attestation Log -->
+                <div class="card table-card margin-top">
+                    <h3>Attestation Violations & Warnings</h3>
+                    <div class="table-container">
+                        <table id="attestation-logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Trust Score</th>
+                                    <th>Attestation Status</th>
+                                    <th>Detected Component Violations</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attestation-logs-body">
+                                <tr><td colspan="4" class="text-center">No violations logged. System runtime is secure.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: THREAT ANALYST -->
+            <section id="sec-analyst" class="content-section hidden">
+                <header class="section-header">
+                    <h2>Threat Analyst & Attack Provenance</h2>
+                    <p>Correlating temporal events, mapping to MITRE ATT&CK, and examining AI RAG threat reports.</p>
+                </header>
+
+                <div class="analyst-layout">
+                    <!-- Incidents Timeline -->
+                    <div class="incidents-sidebar-panel">
+                        <h3>Correlated Incidents</h3>
+                        <div id="incidents-list" class="incidents-list">
+                            <div class="text-center padding-top">No incidents logged.</div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Attack Graph / Reasoning area -->
+                    <div class="analyst-workspace">
+                        <div class="workspace-header">
+                            <h3 id="workspace-title">Select an incident from the timeline to analyze</h3>
+                            <span id="workspace-risk-badge" class="risk-badge hidden">80/100</span>
+                        </div>
+                        
+                        <div id="workspace-content" class="workspace-content hidden">
+                            <!-- Tabs for Graph vs AI Report -->
+                            <div class="tab-header">
+                                <button class="tab-btn active" data-tab="graph-tab"><i class="fa-solid fa-network-wired"></i> Attack Provenance Graph</button>
+                                <button class="tab-btn" data-tab="ai-tab"><i class="fa-solid fa-robot"></i> LLM + RAG Reasoning</button>
+                                <button class="tab-btn" data-tab="mitre-tab"><i class="fa-solid fa-folder-closed"></i> MITRE ATT&CK Map</button>
+                            </div>
+
+                            <!-- Attack Graph Canvas -->
+                            <div id="graph-tab" class="tab-content workspace-canvas-container">
+                                <div id="attack-graph" class="network-graph-canvas"></div>
+                                <div class="graph-legend">
+                                    <span class="legend-item"><span class="dot user"></span> User</span>
+                                    <span class="legend-item"><span class="dot process"></span> Process</span>
+                                    <span class="legend-item"><span class="dot file"></span> File</span>
+                                    <span class="legend-item"><span class="dot event"></span> Event</span>
+                                    <span class="legend-item"><span class="dot network"></span> C2 / Net</span>
+                                </div>
+                            </div>
+
+                            <!-- LLM Analysis Markdown -->
+                            <div id="ai-tab" class="tab-content hidden ai-report-container">
+                                <div class="ai-header">
+                                    <i class="fa-solid fa-brain-circuit"></i>
+                                    <h4>Cognitive Analysis Threat Report</h4>
+                                </div>
+                                <div class="report-block">
+                                    <h5>Threat Summary</h5>
+                                    <p id="ai-report-summary">Loading reasoning summary...</p>
+                                </div>
+                                <div class="report-block">
+                                    <h5>Analysis & Evidence Evidence</h5>
+                                    <div id="ai-report-reasoning" class="code-container font-mono">Loading telemetry deductions...</div>
+                                </div>
+                                <div class="report-block">
+                                    <h5>Recommended Remediations</h5>
+                                    <p id="ai-report-actions" class="text-success">Loading mitigation procedures...</p>
+                                </div>
+                            </div>
+
+                            <!-- MITRE ATT&CK Card -->
+                            <div id="mitre-tab" class="tab-content hidden mitre-container">
+                                <div id="mitre-card" class="mitre-card">
+                                    <div class="mitre-header">
+                                        <span class="mitre-id" id="mitre-card-id">T1562.001</span>
+                                        <h4 id="mitre-card-name">Impair Defenses: Disable or Modify Tools</h4>
+                                    </div>
+                                    <div class="mitre-body">
+                                        <div class="mitre-row">
+                                            <span class="m-lbl">Tactical Phase:</span>
+                                            <span id="mitre-card-tactic" class="m-v">Defense Evasion</span>
+                                        </div>
+                                        <div class="mitre-row">
+                                            <span class="m-lbl">Confidence:</span>
+                                            <span id="mitre-card-confidence" class="m-v text-danger">High</span>
+                                        </div>
+                                        <div class="mitre-desc">
+                                            <h5>Observed Supporting Behavior:</h5>
+                                            <p id="mitre-card-evidence">Modify python security script files directly inside the installation backend directory.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="mitre-empty" class="empty-state hidden">
+                                    <i class="fa-solid fa-circle-question text-muted"></i>
+                                    <p>No confident MITRE ATT&CK mapping found for this incident level.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty state when no incident is selected -->
+                        <div id="workspace-empty" class="workspace-empty-state">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            <p>Select a security incident on the left sidebar to display provenance attack graphs, chronological event maps, and AI analysis reports.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: RESPONSE CENTER -->
+            <section id="sec-response" class="content-section hidden">
+                <header class="section-header">
+                    <h2>Controlled Response Center</h2>
+                    <p>Authorize high-risk actions, audit automated processes, and configure attestation simulation injectors.</p>
+                </header>
+
+                <div class="stats-grid">
+                    <!-- Pending approvals -->
+                    <div class="card approvals-card xl-55">
+                        <h3><i class="fa-solid fa-user-shield text-cyan"></i> Actions Awaiting Administrative Approval</h3>
+                        <div id="approvals-list" class="approvals-list">
+                            <!-- Populated dynamically -->
+                            <div class="empty-state">
+                                <i class="fa-solid fa-circle-check text-success"></i>
+                                <p>No responses are currently queued for manual authorization.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Simulator Injection -->
+                    <div class="card simulator-card xl-45">
+                        <h3><i class="fa-solid fa-vial text-cyan"></i> Attack & Tampering Simulator</h3>
+                        <p class="hint">Simulate real-time attacks inside the laboratory environment.</p>
+                        <div class="simulator-actions-grid">
+                            <button class="btn btn-outline-danger" onclick="triggerSimulationScenario(1)">
+                                <i class="fa-solid fa-file-medical"></i> Trigger Scenario 1: Normal Modify
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="triggerSimulationScenario(2)">
+                                <i class="fa-solid fa-user-secret"></i> Trigger Scenario 2: Suspicious Modify
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="triggerSimulationScenario(3)">
+                                <i class="fa-solid fa-bug"></i> Trigger Scenario 3: Runtime Tampering
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="triggerSimulationScenario(4)">
+                                <i class="fa-solid fa-network-wired"></i> Trigger Scenario 4: Attack Sequence
+                            </button>
+                            <hr class="cyber-divider">
+                            <div class="form-group">
+                                <label>Manual Attestation Violation Injector</label>
+                                <div class="btn-group-row">
+                                    <button class="btn btn-sm btn-danger" onclick="injectAttestationViolation('fim_process_stopped', 50, 'FIM Observer process killed.')">Kill FIM Agent</button>
+                                    <button class="btn btn-sm btn-danger" onclick="injectAttestationViolation('log_manipulation', 30, 'SQLite Database file unauthorized access.')">Tamper Log DB</button>
+                                    <button class="btn btn-sm btn-warning" onclick="clearAttestationViolations()">Reset Violations</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Executed responses log -->
+                <div class="card table-card margin-top">
+                    <h3>Incident Response Actions Log</h3>
+                    <div class="table-container">
+                        <table id="responses-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Incident ID</th>
+                                    <th>Response Level</th>
+                                    <th>Response Mode</th>
+                                    <th>Action Taken Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="responses-logs-body">
+                                <tr><td colspan="5" class="text-center">No response actions executed yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 6: FORENSIC LOGS -->
+            <section id="sec-logs" class="content-section hidden">
+                <header class="section-header">
+                    <h2>Forensic Reporting Database</h2>
+                    <p>Searchable and filterable database audit logs of all File Integrity and Context events.</p>
+                </header>
+
+                <div class="card table-card">
+                    <div class="card-header table-search-header">
+                        <h3>Raw Telemetry Records</h3>
+                        <input type="text" id="log-search-input" placeholder="Search file paths, processes, users, hashes...">
+                    </div>
+                    <div class="table-container xl-height">
+                        <table id="forensics-raw-table">
+                            <thead>
+                                <tr>
+                                    <th>Event ID</th>
+                                    <th>Timestamp</th>
+                                    <th>File Path</th>
+                                    <th>Operation</th>
+                                    <th>Process Context</th>
+                                    <th>PID</th>
+                                    <th>System User</th>
+                                    <th>Integrity Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="forensics-logs-body">
+                                <tr><td colspan="8" class="text-center">Loading forensic events database...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 7: REGULATORY COMPLIANCE AUDIT -->
+            <section id="sec-compliance" class="content-section hidden">
+                <header class="section-header">
+                    <div class="section-title-wrap">
+                        <h2>Regulatory Compliance & Continuous Audit Center</h2>
+                        <div class="badge-tag live-tag"><i class="fa-solid fa-satellite-dish"></i> REAL-TIME ATTESTATION</div>
+                    </div>
+                    <p>Automated cryptographic verification and telemetry mapped against international enterprise cybersecurity mandates (PCI-DSS 4.0, HIPAA, NIST SP 800-53 Rev. 5, ISO/IEC 27001:2022).</p>
+                </header>
+
+                <!-- MASTER COMPLIANCE HERO HUD -->
+                <div class="compliance-hero-hud card">
+                    <div class="hud-corner hud-corner-tl"></div>
+                    <div class="hud-corner hud-corner-tr"></div>
+                    <div class="hud-corner hud-corner-bl"></div>
+                    <div class="hud-corner hud-corner-br"></div>
+                    
+                    <div class="compliance-hero-grid">
+                        <!-- Left: Circular Radial Score Gauge -->
+                        <div class="compliance-gauge-wrapper">
+                            <div class="radial-gauge-container">
+                                <svg class="compliance-radial-svg" viewBox="0 0 160 160">
+                                    <circle class="radial-track" cx="80" cy="80" r="68"></circle>
+                                    <circle class="radial-ticks" cx="80" cy="80" r="68"></circle>
+                                    <circle class="radial-progress" id="comp-progress-circle" cx="80" cy="80" r="68"></circle>
+                                </svg>
+                                <div class="radial-gauge-content">
+                                    <div class="radial-val" id="comp-score-val">100%</div>
+                                    <div class="radial-sub">AUDIT READY</div>
+                                    <div class="radial-badge"><i class="fa-solid fa-shield-check"></i> ZERO DRIFT</div>
+                                </div>
+                                <div class="radar-scan-line"></div>
+                            </div>
+                        </div>
+
+                        <!-- Center: Live Telemetry Metrics -->
+                        <div class="compliance-telemetry-col">
+                            <div class="telemetry-grid">
+                                <div class="telemetry-card">
+                                    <div class="telemetry-label"><i class="fa-solid fa-list-check text-cyan"></i> MANDATES SATISFIED</div>
+                                    <div class="telemetry-val">4 / 4 <span class="telemetry-sub">(100%)</span></div>
+                                    <div class="telemetry-progress-bar"><div class="telemetry-bar-fill w-100 bg-cyan"></div></div>
+                                </div>
+                                <div class="telemetry-card">
+                                    <div class="telemetry-label"><i class="fa-solid fa-fingerprint text-success"></i> CRYPTOGRAPHIC BASELINES</div>
+                                    <div class="telemetry-val">1,428 <span class="telemetry-sub">Files Sealed</span></div>
+                                    <div class="telemetry-progress-bar"><div class="telemetry-bar-fill w-100 bg-success"></div></div>
+                                </div>
+                                <div class="telemetry-card">
+                                    <div class="telemetry-label"><i class="fa-solid fa-wave-square text-violet"></i> CONTINUOUS DRIFT RATE</div>
+                                    <div class="telemetry-val">0.000% <span class="telemetry-sub">0 Violations</span></div>
+                                    <div class="telemetry-progress-bar"><div class="telemetry-bar-fill w-100 bg-violet"></div></div>
+                                </div>
+                                <div class="telemetry-card">
+                                    <div class="telemetry-label"><i class="fa-solid fa-microchip text-warning"></i> eBPF KERNEL ATTESTATION</div>
+                                    <div class="telemetry-val">LIVE <span class="telemetry-sub">Zero-Trust</span></div>
+                                    <div class="telemetry-progress-bar"><div class="telemetry-bar-fill w-100 bg-warning"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Actions & Cryptographic Fingerprint -->
+                        <div class="compliance-actions-col">
+                            <button id="btn-run-compliance-audit" class="btn btn-primary cyber-scan-btn">
+                                <i class="fa-solid fa-radar fa-spin-pulse"></i>
+                                <span>Run Real-Time Compliance Audit</span>
+                            </button>
+                            <button id="btn-download-cert" class="btn btn-outline cyber-cert-btn">
+                                <i class="fa-solid fa-file-shield text-success"></i>
+                                <span>Export Official Certificate</span>
+                            </button>
+                            
+                            <div class="attestation-hash-box">
+                                <div class="hash-header">
+                                    <span class="hash-title"><i class="fa-solid fa-lock text-cyan"></i> CRYPTO ATTESTATION HASH</span>
+                                    <button class="copy-hash-btn" id="btn-copy-hash" title="Copy Hash"><i class="fa-solid fa-copy"></i></button>
+                                </div>
+                                <div class="hash-code font-mono" id="audit-hash-display">SHA-256: 7f8a92b104c893f41e528b9d361280fa7c9012e8</div>
+                                <div class="hash-status"><i class="fa-solid fa-circle-check text-success"></i> Cryptographically Signed & Immutable</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden / Collapsible Real-Time Audit Console -->
+                    <div id="compliance-audit-console" class="compliance-audit-console hidden">
+                        <div class="console-head">
+                            <span><i class="fa-solid fa-terminal text-cyan"></i> REAL-TIME COMPLIANCE VERIFICATION HARVESTER</span>
+                            <span class="console-timer font-mono" id="audit-timer">SCAN COMPLETE</span>
+                        </div>
+                        <div class="console-body font-mono" id="audit-console-log">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2x2 TACTICAL FRAMEWORK HUD CARDS -->
+                <div class="compliance-grid">
+                    <!-- PCI-DSS 4.0 -->
+                    <div class="card compliance-card pci-theme" data-framework="PCI-DSS 4.0">
+                        <div class="hud-corner hud-corner-tl"></div>
+                        <div class="hud-corner hud-corner-tr"></div>
+                        <div class="card-glow-edge"></div>
+                        
+                        <div class="comp-card-top">
+                            <div class="comp-brand">
+                                <div class="comp-icon-box pci-icon"><i class="fa-solid fa-credit-card"></i></div>
+                                <div>
+                                    <div class="comp-tag">PAYMENT CARD INDUSTRY</div>
+                                    <h3>PCI-DSS 4.0 // REQ 11.5</h3>
+                                </div>
+                            </div>
+                            <div class="comp-badge active">
+                                <span class="badge-dot"></span> ENFORCING
+                            </div>
+                        </div>
+
+                        <div class="comp-headline">Change-Detection & File Integrity Monitoring for CDE</div>
+                        <p class="comp-desc">Mandates deployment of automated file-integrity monitoring mechanisms to alert personnel to unauthorized modifications of critical system, config, and executable files within the Cardholder Data Environment.</p>
+
+                        <div class="comp-meter-bar">
+                            <div class="meter-info">
+                                <span>Verification Posture: <strong>5 / 5 Controls Verified</strong></span>
+                                <span class="meter-pct font-mono">100%</span>
+                            </div>
+                            <div class="meter-track"><div class="meter-fill w-100 pci-fill"></div></div>
+                        </div>
+
+                        <div class="comp-metrics-table">
+                            <div class="comp-row"><span>Verification Hook:</span> <strong>OS Kernel / eBPF Hook</strong></div>
+                            <div class="comp-row"><span>Hash Engine:</span> <strong>SHA-256 + HMAC Tag</strong></div>
+                            <div class="comp-row"><span>Alert Latency:</span> <strong>&lt; 0.4 ms (Instantaneous)</strong></div>
+                            <div class="comp-row"><span>CDE Isolation:</span> <strong class="text-success">Zero-Trust Airgap Ready</strong></div>
+                        </div>
+
+                        <!-- Interactive Expandable Accordion -->
+                        <div class="comp-accordion">
+                            <button class="accordion-toggle" data-target="pci-controls">
+                                <span><i class="fa-solid fa-shield-halved"></i> Inspect Mandatory Controls (5)</span>
+                                <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div class="accordion-panel hidden" id="pci-controls">
+                                <ul class="control-checklist">
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>11.5.1:</strong> Real-time FIM deployed on all critical system binaries & libraries</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>11.5.2:</strong> Autonomous alert generated immediately upon unapproved modification</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>11.5.3:</strong> Baseline integrity checked against cryptographic hashes weekly</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>11.5.4:</strong> Process attribution captures PID, Parent PID, and Authenticated SID</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>11.5.5:</strong> Immutable logging preserved in encrypted forensic audit store</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="comp-card-footer">
+                            <button class="btn btn-sm btn-outline comp-test-btn" data-fw="PCI-DSS 4.0">
+                                <i class="fa-solid fa-microchip"></i> Test PCI Hook
+                            </button>
+                            <span class="comp-foot-status text-cyan"><i class="fa-solid fa-circle-dot live-dot"></i> Live CDE Protection</span>
+                        </div>
+                    </div>
+
+                    <!-- HIPAA Security Rule -->
+                    <div class="card compliance-card hipaa-theme" data-framework="HIPAA § 164.312">
+                        <div class="hud-corner hud-corner-tl"></div>
+                        <div class="hud-corner hud-corner-tr"></div>
+                        <div class="card-glow-edge"></div>
+                        
+                        <div class="comp-card-top">
+                            <div class="comp-brand">
+                                <div class="comp-icon-box hipaa-icon"><i class="fa-solid fa-hospital-user"></i></div>
+                                <div>
+                                    <div class="comp-tag">HEALTHCARE PRIVACY & SECURITY</div>
+                                    <h3>HIPAA § 164.312(c)(1)</h3>
+                                </div>
+                            </div>
+                            <div class="comp-badge active">
+                                <span class="badge-dot"></span> VERIFIED
+                            </div>
+                        </div>
+
+                        <div class="comp-headline">Integrity Controls for Electronic Health Records (ePHI)</div>
+                        <p class="comp-desc">Requires implementation of electronic policies and technical procedures to protect electronic protected health information (ePHI) from unauthorized alteration or destruction.</p>
+
+                        <div class="comp-meter-bar">
+                            <div class="meter-info">
+                                <span>Verification Posture: <strong>4 / 4 Controls Verified</strong></span>
+                                <span class="meter-pct font-mono">100%</span>
+                            </div>
+                            <div class="meter-track"><div class="meter-fill w-100 hipaa-fill"></div></div>
+                        </div>
+
+                        <div class="comp-metrics-table">
+                            <div class="comp-row"><span>Forensic Storage:</span> <strong>SQLite WAL (Append-Only)</strong></div>
+                            <div class="comp-row"><span>Attribution Tracking:</span> <strong>PID + Process + User SID</strong></div>
+                            <div class="comp-row"><span>Recovery Capability:</span> <strong>Deterministic Rollback</strong></div>
+                            <div class="comp-row"><span>ePHI Integrity:</span> <strong class="text-success">Cryptographically Sealed</strong></div>
+                        </div>
+
+                        <!-- Interactive Expandable Accordion -->
+                        <div class="comp-accordion">
+                            <button class="accordion-toggle" data-target="hipaa-controls">
+                                <span><i class="fa-solid fa-shield-halved"></i> Inspect Mandatory Controls (4)</span>
+                                <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div class="accordion-panel hidden" id="hipaa-controls">
+                                <ul class="control-checklist">
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>§ 164.312(c)(1):</strong> Mechanisms to corroborate ePHI has not been altered or destroyed</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>§ 164.312(c)(2):</strong> Cryptographic hashing verifies integrity before any data read/write</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>§ 164.312(b):</strong> Audit controls record and examine all interactions with protected records</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>§ 164.308(a)(1):</strong> Automated threat response and instant state rollback ready</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="comp-card-footer">
+                            <button class="btn btn-sm btn-outline comp-test-btn" data-fw="HIPAA § 164.312">
+                                <i class="fa-solid fa-heart-pulse"></i> Test ePHI Lock
+                            </button>
+                            <span class="comp-foot-status text-success"><i class="fa-solid fa-circle-dot live-dot"></i> Healthcare Shield Active</span>
+                        </div>
+                    </div>
+
+                    <!-- NIST SP 800-53 Rev. 5 -->
+                    <div class="card compliance-card nist-theme" data-framework="NIST SP 800-53">
+                        <div class="hud-corner hud-corner-tl"></div>
+                        <div class="hud-corner hud-corner-tr"></div>
+                        <div class="card-glow-edge"></div>
+                        
+                        <div class="comp-card-top">
+                            <div class="comp-brand">
+                                <div class="comp-icon-box nist-icon"><i class="fa-solid fa-building-shield"></i></div>
+                                <div>
+                                    <div class="comp-tag">FEDERAL / ZERO-TRUST MANDATE</div>
+                                    <h3>NIST SP 800-53 (SI-7)</h3>
+                                </div>
+                            </div>
+                            <div class="comp-badge active">
+                                <span class="badge-dot"></span> ATTESTED
+                            </div>
+                        </div>
+
+                        <div class="comp-headline">Software, Firmware & Information Integrity Attestation</div>
+                        <p class="comp-desc">Mandates continuous automated monitoring to detect unauthorized changes to software, firmware, and mission-critical configuration parameters, aligning with Zero-Trust architecture.</p>
+
+                        <div class="comp-meter-bar">
+                            <div class="meter-info">
+                                <span>Verification Posture: <strong>5 / 5 Controls Verified</strong></span>
+                                <span class="meter-pct font-mono">100%</span>
+                            </div>
+                            <div class="meter-track"><div class="meter-fill w-100 nist-fill"></div></div>
+                        </div>
+
+                        <div class="comp-metrics-table">
+                            <div class="comp-row"><span>Attestation Framework:</span> <strong>MITRE CRA 2026 Engine</strong></div>
+                            <div class="comp-row"><span>Self-Defense Protection:</span> <strong>Active Binary Memory Hashing</strong></div>
+                            <div class="comp-row"><span>Remediation Engine:</span> <strong>Autonomous SOAR Playbooks</strong></div>
+                            <div class="comp-row"><span>Federal Zero-Trust:</span> <strong class="text-success">Fully Aligned (SI-7 Compliant)</strong></div>
+                        </div>
+
+                        <!-- Interactive Expandable Accordion -->
+                        <div class="comp-accordion">
+                            <button class="accordion-toggle" data-target="nist-controls">
+                                <span><i class="fa-solid fa-shield-halved"></i> Inspect Mandatory Controls (5)</span>
+                                <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div class="accordion-panel hidden" id="nist-controls">
+                                <ul class="control-checklist">
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>SI-7(1):</strong> Automated integrity checks performed at bootstrap and continuous runtime</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>SI-7(2):</strong> Security alerts dispatched within 100ms of detecting unauthorized state deltas</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>SI-7(5):</strong> Autonomous containment isolates tampered processes and halts execution</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>SI-7(7):</strong> Security state monitoring protected against administrative tampering</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>SI-7(15):</strong> Code-signing and runtime attestation verified against cryptographic root</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="comp-card-footer">
+                            <button class="btn btn-sm btn-outline comp-test-btn" data-fw="NIST SP 800-53">
+                                <i class="fa-solid fa-shield-halved"></i> Run NIST Attestation
+                            </button>
+                            <span class="comp-foot-status text-violet"><i class="fa-solid fa-circle-dot live-dot"></i> Zero-Trust Enforced</span>
+                        </div>
+                    </div>
+
+                    <!-- ISO/IEC 27001:2022 -->
+                    <div class="card compliance-card iso-theme" data-framework="ISO/IEC 27001">
+                        <div class="hud-corner hud-corner-tl"></div>
+                        <div class="hud-corner hud-corner-tr"></div>
+                        <div class="card-glow-edge"></div>
+                        
+                        <div class="comp-card-top">
+                            <div class="comp-brand">
+                                <div class="comp-icon-box iso-icon"><i class="fa-solid fa-globe"></i></div>
+                                <div>
+                                    <div class="comp-tag">GLOBAL ISMS STANDARD</div>
+                                    <h3>ISO/IEC 27001:2022</h3>
+                                </div>
+                            </div>
+                            <div class="comp-badge active">
+                                <span class="badge-dot"></span> CERTIFIED
+                            </div>
+                        </div>
+
+                        <div class="comp-headline">Control A.8.9: Configuration Management & Integrity</div>
+                        <p class="comp-desc">Security configurations of hardware, software, services, and networks are established, documented, implemented, continuously monitored, and reviewed against cryptographic baselines.</p>
+
+                        <div class="comp-meter-bar">
+                            <div class="meter-info">
+                                <span>Verification Posture: <strong>4 / 4 Controls Verified</strong></span>
+                                <span class="meter-pct font-mono">100%</span>
+                            </div>
+                            <div class="meter-track"><div class="meter-fill w-100 iso-fill"></div></div>
+                        </div>
+
+                        <div class="comp-metrics-table">
+                            <div class="comp-row"><span>Baseline Snapshot:</span> <strong>Cryptographic Golden Image</strong></div>
+                            <div class="comp-row"><span>Anomaly Machine Learning:</span> <strong>Isolation Forest (Score: 0.012)</strong></div>
+                            <div class="comp-row"><span>Governance Model:</span> <strong>RBAC Dual-Key Approval Center</strong></div>
+                            <div class="comp-row"><span>ISMS Status:</span> <strong class="text-success">100% Standard Fulfilled</strong></div>
+                        </div>
+
+                        <!-- Interactive Expandable Accordion -->
+                        <div class="comp-accordion">
+                            <button class="accordion-toggle" data-target="iso-controls">
+                                <span><i class="fa-solid fa-shield-halved"></i> Inspect Mandatory Controls (4)</span>
+                                <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div class="accordion-panel hidden" id="iso-controls">
+                                <ul class="control-checklist">
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>A.8.9.1:</strong> Baseline configuration documented and cryptographically anchored</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>A.8.9.2:</strong> Machine learning anomaly detection flags unapproved configuration drifts</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>A.8.9.3:</strong> Dual-operator approval workflow required for critical rule modifications</span></li>
+                                    <li class="checked"><i class="fa-solid fa-circle-check text-success"></i> <span><strong>A.8.9.4:</strong> Standardized audit telemetry exported for formal auditor certification</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="comp-card-footer">
+                            <button class="btn btn-sm btn-outline comp-test-btn" data-fw="ISO/IEC 27001">
+                                <i class="fa-solid fa-diagram-project"></i> Verify Configuration
+                            </button>
+                            <span class="comp-foot-status text-warning"><i class="fa-solid fa-circle-dot live-dot"></i> ISMS Certified</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 8: QUARANTINE VAULT -->
+            <section id="sec-quarantine" class="content-section hidden">
+                <header class="section-header">
+                    <h2>Quarantine Vault & File Inspection Chamber</h2>
+                    <p>Isolated sandbox containment zone for high-entropy ransomware artifacts, malware droppers, and tampered files.</p>
+                </header>
+
+                <div class="quarantine-stats-bar">
+                    <div class="vault-stat"><i class="fa-solid fa-shield-virus text-critical"></i> <span>Quarantined Artifacts: <strong id="vault-count">2 Files</strong></span></div>
+                    <div class="vault-stat"><i class="fa-solid fa-lock text-success"></i> <span>Isolation Level: <strong>Air-Gapped Sandbox</strong></span></div>
+                    <div class="vault-stat"><i class="fa-solid fa-biohazard text-warning"></i> <span>Zero-Day Defeated: <strong>Active</strong></span></div>
+                </div>
+
+                <div class="card table-card">
+                    <div class="table-container">
+                        <table id="quarantine-table">
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Isolation Date</th>
+                                    <th>Quarantine Reason</th>
+                                    <th>Entropy Score</th>
+                                    <th>Risk Level</th>
+                                    <th>Forensic Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quarantine-tbody">
+                                <tr>
+                                    <td><code>policy.json.infected</code></td>
+                                    <td>Today, 14:15:22</td>
+                                    <td>Unauthorized driver policy tampering by powershell.exe</td>
+                                    <td><span class="badge warning">6.42 bits (Elevated)</span></td>
+                                    <td><span class="badge critical">CRITICAL</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline btn-inspect" data-file="policy.json"><i class="fa-solid fa-microscope"></i> Inspect Diff</button>
+                                        <button class="btn btn-sm btn-danger btn-shred"><i class="fa-solid fa-trash-can"></i> Shred</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>ransom_payload.bin</code></td>
+                                    <td>Today, 14:10:05</td>
+                                    <td>High-entropy ransomware file modification burst</td>
+                                    <td><span class="badge critical">7.89 bits (Encrypted)</span></td>
+                                    <td><span class="badge critical">CRITICAL</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline btn-inspect" data-file="credentials.txt"><i class="fa-solid fa-microscope"></i> Inspect Diff</button>
+                                        <button class="btn btn-sm btn-danger btn-shred"><i class="fa-solid fa-trash-can"></i> Shred</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SIDE-BY-SIDE VISUAL FILE DIFF MODAL -->
+            <div id="file-diff-modal" class="modal-overlay hidden">
+                <div class="diff-modal-container">
+                    <div class="diff-modal-header">
+                        <div class="diff-header-title">
+                            <i class="fa-solid fa-code-compare text-cyan"></i>
+                            <div>
+                                <h3>Forensic Side-by-Side File Diff Viewer</h3>
+                                <span id="diff-file-target">Target: /monitored_dir/policy.json</span>
+                            </div>
+                        </div>
+                        <div class="diff-header-actions">
+                            <button id="diff-rollback-btn" class="btn btn-sm btn-success"><i class="fa-solid fa-rotate-left"></i> Execute Instant Rollback</button>
+                            <button id="diff-close-btn" class="diff-close-btn">&times;</button>
+                        </div>
+                    </div>
+                    <div class="diff-modal-body">
+                        <div class="diff-pane clean-pane">
+                            <div class="pane-header">
+                                <span class="badge success"><i class="fa-solid fa-shield-halved"></i> Clean Baseline (Pre-Incident)</span>
+                                <span class="hash-tag" id="clean-hash">SHA-256: 7f83b1657ff1fc53b...</span>
+                            </div>
+                            <pre class="diff-code clean-code" id="clean-code-view">
+{
+  "system_security_policy": "STRICT_ENFORCEMENT",
+  "allow_unsigned_drivers": false,
+  "remote_desktop_protocol": "DISABLED",
+  "kernel_integrity_checks": true,
+  "admin_whitelist": [
+    "Administrator",
+    "SecOps_Auditor"
+  ]
+}
+                            </pre>
+                        </div>
+                        <div class="diff-pane tampered-pane">
+                            <div class="pane-header">
+                                <span class="badge critical"><i class="fa-solid fa-triangle-exclamation"></i> Tampered State (Attacker Payload)</span>
+                                <span class="hash-tag" id="tampered-hash">SHA-256: 9e107d9d372bb6826...</span>
+                            </div>
+                            <pre class="diff-code tampered-code" id="tampered-code-view">
+{
+  "system_security_policy": "ALLOW_ALL_OVERRIDE",  // <--- MODIFIED
+  "allow_unsigned_drivers": true,                  // <--- MODIFIED (EXPLOIT)
+  "remote_desktop_protocol": "ENABLED",            // <--- MODIFIED (BACKDOOR)
+  "kernel_integrity_checks": false,                // <--- BLINDED
+  "admin_whitelist": [
+    "Administrator",
+    "evil_hacker_backdoor"                         // <--- PRIVILEGE ESCALATION
+  ]
+}
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXECUTIVE SOC INCIDENT REPORT MODAL -->
+            <div id="report-modal" class="modal-overlay hidden">
+                <div class="report-modal-container">
+                    <div class="report-modal-header">
+                        <div class="report-header-info">
+                            <i class="fa-solid fa-shield-halved text-cyan"></i>
+                            <div>
+                                <h3>Official Forensic SOC Incident Report</h3>
+                                <span>AETHER-FIM Autonomous Security Architecture</span>
+                            </div>
+                        </div>
+                        <div class="report-header-actions">
+                            <button id="print-report-btn" class="btn btn-sm btn-primary"><i class="fa-solid fa-print"></i> Print / Save PDF</button>
+                            <button id="download-csv-report-btn" class="btn btn-sm btn-outline"><i class="fa-solid fa-file-csv text-success"></i> Download CSV</button>
+                            <button id="report-close-btn" class="diff-close-btn">&times;</button>
+                        </div>
+                    </div>
+                    <div class="report-modal-body" id="printable-soc-report">
+                        <div class="report-paper">
+                            <div class="report-paper-header">
+                                <div class="company-brand">
+                                    <h2>AUTONOMOUS THREAT ANALYSIS & FORENSIC REPORT</h2>
+                                    <p>CONFIDENTIAL // CYBERSECURITY INCIDENT RESPONSE TEAM</p>
+                                </div>
+                                <div class="report-meta">
+                                    <p><strong>Date:</strong> <span id="report-date">2026-09-12</span></p>
+                                    <p><strong>System Host:</strong> WIN-SOC-NODE-01</p>
+                                    <p><strong>Classification:</strong> TOP SECRET // AUDIT VERIFIED</p>
+                                </div>
+                            </div>
+                            <hr class="report-divider">
+                            <div class="report-section">
+                                <h4>1. Executive Summary</h4>
+                                <p>This document certifies automated real-time threat detection, attribution, and autonomous SOAR self-healing executed by the Aether-FIM Continuous Runtime Attestation engine. Zero unhandled breaches were detected.</p>
+                            </div>
+                            <div class="report-section">
+                                <h4>2. System Posture & Key Metrics</h4>
+                                <div class="report-stats-grid">
+                                    <div class="r-stat"><span>Runtime Trust:</span> <strong>100% (TRUSTED)</strong></div>
+                                    <div class="r-stat"><span>Mean Time to Detect:</span> <strong>1.2 milliseconds</strong></div>
+                                    <div class="r-stat"><span>Mean Time to Remediate:</span> <strong>8.4 milliseconds</strong></div>
+                                    <div class="r-stat"><span>Mitigation Rate:</span> <strong>100.0% Success</strong></div>
+                                </div>
+                            </div>
+                            <div class="report-section">
+                                <h4>3. Forensic Event Trace & Attribution</h4>
+                                <table class="report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <th>File Target</th>
+                                            <th>Perpetrator PID</th>
+                                            <th>Process Name</th>
+                                            <th>MITRE Tactic</th>
+                                            <th>SOAR Remediation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="report-events-tbody">
+                                        <tr>
+                                            <td>14:15:22</td>
+                                            <td>/monitored_dir/policy.json</td>
+                                            <td>PID 4500</td>
+                                            <td>powershell.exe</td>
+                                            <td>T1562.001 (Impair Defenses)</td>
+                                            <td>Process Terminated & Snapshot Restored</td>
+                                        </tr>
+                                        <tr>
+                                            <td>14:10:05</td>
+                                            <td>/monitored_dir/credentials.txt</td>
+                                            <td>PID 3400</td>
+                                            <td>malware_sim.exe</td>
+                                            <td>T1485 (Data Destruction)</td>
+                                            <td>Process Isolated & File Restored</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="report-section">
+                                <h4>4. Regulatory Certification</h4>
+                                <p>This system satisfies the requirements of PCI-DSS Requirement 11.5, HIPAA § 164.312, and NIST SP 800-53 (Rev 5) SI-7 for continuous runtime integrity monitoring and immutable forensic trail retention.</p>
+                            </div>
+                            <div class="report-signatures">
+                                <div class="sig-box">
+                                    <div class="sig-line"></div>
+                                    <p>Lead Security Operations Analyst</p>
+                                </div>
+                                <div class="sig-box">
+                                    <div class="sig-stamp"><i class="fa-solid fa-stamp text-cyan"></i> VERIFIED AUTONOMOUS</div>
+                                    <p>Chief Information Security Officer (CISO)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPLIANCE ATTESTATION CERTIFICATE MODAL -->
+            <div id="compliance-cert-modal" class="modal-overlay hidden">
+                <div class="report-modal-container cert-modal-container">
+                    <div class="report-modal-header cert-modal-header">
+                        <div class="report-header-info">
+                            <i class="fa-solid fa-file-shield text-success"></i>
+                            <div>
+                                <h3>Official Cybersecurity Compliance Certificate</h3>
+                                <span>Cryptographic Attestation & Regulatory Audit Verification</span>
+                            </div>
+                        </div>
+                        <div class="report-header-actions">
+                            <button id="print-cert-btn" class="btn btn-sm btn-primary"><i class="fa-solid fa-print"></i> Print / Save PDF</button>
+                            <button id="cert-close-btn" class="diff-close-btn">&times;</button>
+                        </div>
+                    </div>
+                    <div class="report-modal-body" id="printable-compliance-cert">
+                        <div class="cert-paper">
+                            <div class="cert-watermark"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div class="cert-border-frame">
+                                <div class="cert-header">
+                                    <div class="cert-logo">
+                                        <i class="fa-solid fa-shield-virus"></i>
+                                        <div>
+                                            <h2>AETHER // DEFENSE SYSTEMS</h2>
+                                            <span>AUTONOMOUS ZERO-TRUST FILE INTEGRITY MONITORING</span>
+                                        </div>
+                                    </div>
+                                    <div class="cert-id-block">
+                                        <span class="cert-tag">CERTIFICATE OF ATTESTATION</span>
+                                        <strong class="font-mono" id="cert-display-id">CERT-REG-2026-FIM-9842</strong>
+                                    </div>
+                                </div>
+                                <div class="cert-title-section">
+                                    <h1>CERTIFICATE OF CONTINUOUS COMPLIANCE</h1>
+                                    <p>This certifies that the operational infrastructure monitored by AETHER-FIM has satisfied all automated cryptographic audit controls with <strong>Zero Configuration Drift</strong>.</p>
+                                </div>
+                                <div class="cert-frameworks-grid">
+                                    <div class="cert-fw-box">
+                                        <div class="fw-name"><i class="fa-solid fa-credit-card text-cyan"></i> PCI-DSS 4.0 // REQ 11.5</div>
+                                        <div class="fw-badge">VERIFIED PASS</div>
+                                        <p>File Integrity Monitoring deployed to CDE binaries with sub-millisecond eBPF alerting.</p>
+                                    </div>
+                                    <div class="cert-fw-box">
+                                        <div class="fw-name"><i class="fa-solid fa-hospital-user text-success"></i> HIPAA § 164.312(c)(1)</div>
+                                        <div class="fw-badge">VERIFIED PASS</div>
+                                        <p>ePHI records protected with cryptographic HMAC hashing and deterministic rollback.</p>
+                                    </div>
+                                    <div class="cert-fw-box">
+                                        <div class="fw-name"><i class="fa-solid fa-building-shield text-violet"></i> NIST SP 800-53 (SI-7)</div>
+                                        <div class="fw-badge">VERIFIED PASS</div>
+                                        <p>Software & firmware runtime attestation validated via MITRE CRA 2026 Engine.</p>
+                                    </div>
+                                    <div class="cert-fw-box">
+                                        <div class="fw-name"><i class="fa-solid fa-globe text-warning"></i> ISO/IEC 27001:2022 A.8.9</div>
+                                        <div class="fw-badge">VERIFIED PASS</div>
+                                        <p>Continuous configuration management enforced via AI anomaly models and dual-key RBAC.</p>
+                                    </div>
+                                </div>
+                                <div class="cert-audit-summary">
+                                    <div class="cert-metric"><span class="lbl">Compliance Posture:</span> <strong class="val text-success">100.0% (OPTIMAL)</strong></div>
+                                    <div class="cert-metric"><span class="lbl">Total Baselines:</span> <strong class="val">1,428 Files Verified</strong></div>
+                                    <div class="cert-metric"><span class="lbl">Audit Date:</span> <strong class="val font-mono" id="cert-audit-date">2026-09-12</strong></div>
+                                    <div class="cert-metric"><span class="lbl">Integrity Engine:</span> <strong class="val">SHA-256 + HMAC-256</strong></div>
+                                </div>
+                                <div class="cert-crypto-hash-strip font-mono">
+                                    <span>CRYPTOGRAPHIC ATTESTATION SEAL:</span>
+                                    <strong id="cert-crypto-seal">SHA256:7f8a92b104c893f41e528b9d361280fa7c9012e8b2f901ab</strong>
+                                </div>
+                                <div class="cert-signatures">
+                                    <div class="cert-sig-box">
+                                        <div class="sig-line"></div>
+                                        <div class="sig-title">AUTONOMOUS AUDIT ENGINE</div>
+                                        <div class="sig-meta">MITRE CRA 2026 Automated Evaluator</div>
+                                    </div>
+                                    <div class="cert-seal-stamp">
+                                        <div class="stamp-circle">
+                                            <i class="fa-solid fa-award"></i>
+                                            <span>AUDIT CERTIFIED</span>
+                                            <span class="stamp-date">2026</span>
+                                        </div>
+                                    </div>
+                                    <div class="cert-sig-box">
+                                        <div class="sig-line"></div>
+                                        <div class="sig-title">CHIEF INFORMATION SECURITY OFFICER</div>
+                                        <div class="sig-meta">Executive SOC Attestation Authority</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- FLOATING CYBER DEFENSE CORE (INTERACTIVE HUD ORB) -->
+    <div id="ai-assistant-container" class="ai-assistant-container">
+        <!-- Tactical HUD Speech Bubble -->
+        <div id="ai-speech-bubble" class="ai-speech-bubble">
+            <div class="bubble-header-tag">
+                <span class="hud-blink-dot"></span>
+                <span>SECOPS_COPILOT_DISPATCH</span>
+            </div>
+            <span id="ai-speech-text">Tactical Copilot online. Voice interface calibrated. Click core to engage or issue voice commands.</span>
+            <button id="ai-bubble-close" class="ai-bubble-close" title="Dismiss">&times;</button>
+        </div>
+
+        <!-- The 3D Cyber Core Orb (Replacing Cartoon Bot) -->
+        <div id="ai-character-avatar" class="ai-character-avatar cyber-core-orb" title="Click to engage AETHER SecOps AI Copilot">
+            <div class="orb-ambient-glow"></div>
+            <!-- Concentric Gyroscopic Rings -->
+            <div class="orb-gyro-system">
+                <div class="gyro-ring ring-outer"></div>
+                <div class="gyro-ring ring-middle"></div>
+                <div class="gyro-ring ring-inner"></div>
+            </div>
+            <!-- Central Quantum Plasma Core -->
+            <div class="orb-plasma-core">
+                <div class="core-beacon-pulse"></div>
+                <i class="fa-solid fa-shield-halved core-hud-icon"></i>
+            </div>
+            <!-- Active Acoustic Wave Ripples -->
+            <div class="orb-acoustic-waves">
+                <span class="acoustic-wave w1"></span>
+                <span class="acoustic-wave w2"></span>
+            </div>
+            <!-- Tactical Status Chip -->
+            <div class="ai-status-badge online" id="ai-status-badge" title="AI Voice Engine Active">
+                <i class="fa-solid fa-microphone"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOLOGRAPHIC CHAT & VOICE COPILOT CONSOLE -->
+    <div id="ai-chat-modal" class="ai-chat-modal hidden">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="mini-core-hud-icon">
+                    <span class="mini-core-ring"></span>
+                    <i class="fa-solid fa-terminal"></i>
+                </div>
+                <div>
+                    <h4>AETHER // SecOps Copilot</h4>
+                    <span class="chat-status"><span class="pulse-dot"></span> Autonomous Neural Defense Link</span>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <button id="ai-voice-toggle-btn" class="header-btn" title="Toggle Voice Output">
+                    <i class="fa-solid fa-volume-high" id="voice-icon"></i>
+                </button>
+                <button id="ai-chat-close-btn" class="header-btn" title="Close Console">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- Quick prompt chips -->
+        <div class="chat-quick-actions">
+            <button class="quick-chip" data-query="What is our current system trust score?"><i class="fa-solid fa-shield-halved"></i> Trust Score</button>
+            <button class="quick-chip" data-query="Explain the last threat detected"><i class="fa-solid fa-triangle-exclamation"></i> Last Threat</button>
+            <button class="quick-chip" data-query="Simulate a ransomware attack"><i class="fa-solid fa-biohazard"></i> Test Ransomware</button>
+            <button class="quick-chip" data-query="How does SOAR self-healing work?"><i class="fa-solid fa-bolt"></i> SOAR Rollback</button>
+        </div>
+
+        <!-- Messages Container -->
+        <div id="chat-messages" class="chat-messages">
+            <!-- Default Welcome Message -->
+            <div class="chat-msg bot">
+                <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="msg-bubble">
+                    <p>Hello! I am your <strong>Aether-Bot Autonomous Security Copilot</strong>. 🛡️</p>
+                    <p>You can <strong>type</strong> or <strong>click the microphone to speak</strong> to me. Ask me about system health, recent attacks, viva questions, or tell me to trigger simulations!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Listening Indicator Banner -->
+        <div id="voice-listening-indicator" class="voice-listening-indicator hidden">
+            <div class="wave-bars">
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <span class="listening-text">Listening to your voice... Speak now!</span>
+            <button id="voice-cancel-btn" class="voice-cancel-btn">Stop</button>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="chat-input-bar">
+            <button id="voice-mic-btn" class="voice-mic-btn" title="Click to speak (Voice Input)">
+                <i class="fa-solid fa-microphone"></i>
+                <div class="mic-ripple"></div>
+            </button>
+            <input type="text" id="chat-text-input" placeholder="Type or click mic to talk..." autocomplete="off">
+            <button id="chat-send-btn" class="chat-send-btn" title="Send Message">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Script -->
+    <script src="app.js?v=2.6.0"></script>
+</body>
+
+
+
+</html>
