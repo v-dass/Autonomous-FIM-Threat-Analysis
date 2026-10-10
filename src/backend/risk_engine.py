@@ -36,25 +36,24 @@ def map_mitre_attack(event_type, file_path, process_name, trust_score, anomaly_s
         }
 
     # Data destruction (File deletions)
-    if event_type == "DELETED" and file_name in SENSITIVE_FILES:
+    if event_type == "DELETED":
         return {
             "technique_id": "T1485",
             "technique_name": "Data Destruction",
             "tactic": "Impact",
-            "evidence": f"Sensitive file '{file_name}' was deleted.",
-            "confidence": "Medium"
+            "evidence": f"Monitored asset '{file_name}' was deleted.",
+            "confidence": "High"
         }
 
-    # Data Alteration (Modification of sensitive config files)
-    if event_type == "MODIFIED" and file_name in SENSITIVE_FILES:
-        if proc_name in SUSPICIOUS_PROCESS_NAMES or anomaly_score > 0.6:
-            return {
-                "technique_id": "T1565.001",
-                "technique_name": "Data Alteration: Stored Data Manipulation",
-                "tactic": "Impact",
-                "evidence": f"Sensitive file '{file_name}' was modified by suspicious process '{process_name}' with anomaly score {anomaly_score}.",
-                "confidence": "High"
-            }
+    # Data Alteration (Modification of monitored files)
+    if event_type == "MODIFIED":
+        return {
+            "technique_id": "T1565.001",
+            "technique_name": "Data Alteration: Stored Data Manipulation",
+            "tactic": "Impact",
+            "evidence": f"Monitored asset '{file_name}' was modified by process '{process_name}'.",
+            "confidence": "High"
+        }
 
     # Execution via shell scripting
     if proc_name in ["powershell.exe", "cmd.exe"]:
@@ -135,10 +134,15 @@ def calculate_risk_score(event_data, anomaly_metrics, trust_metrics):
     # Final Risk Summation
     total_risk = integrity_score + ml_contribution + trust_contribution + context_contribution
     
-    # Priority escalation: If a known suspicious/malicious process violates the integrity of a sensitive file
-    if is_suspicious_proc and is_sensitive and integrity_score > 0:
-        total_risk = max(total_risk, 82.0)
-        reasons.append("🚨 High-severity violation: Suspicious process tampering with high-value sensitive asset.")
+    # Any integrity violation on an ingested asset is at least HIGH RISK (68)
+    if integrity_score > 0:
+        total_risk = max(total_risk, 68.0)
+        reasons.append("🚨 Monitored asset integrity breached: Cryptographic SHA-256 hash mismatch detected.")
+
+    # Priority escalation: If a known suspicious/malicious process violates the integrity
+    if is_suspicious_proc and integrity_score > 0:
+        total_risk = max(total_risk, 88.0)
+        reasons.append("🚨 Critical escalation: Suspicious process tampering with monitored asset.")
 
     total_risk = round(max(0.0, min(100.0, total_risk)))
 

@@ -181,9 +181,9 @@ def get_system_status():
     incidents = logger.get_recent_incidents(limit=1)
     current_threat = "NORMAL"
     if incidents:
-        # Check if the incident happened in the last 60 seconds
+        # Check if the incident happened in the last 5 minutes (300 seconds)
         time_diff = datetime.now() - datetime.fromisoformat(incidents[0]["timestamp"])
-        if time_diff.total_seconds() < 60:
+        if time_diff.total_seconds() < 300:
             current_threat = incidents[0]["threat_classification"]
 
     return {
